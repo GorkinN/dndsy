@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>D&D Приключение | Интерактивная карта</title>
+    <title>D&D Приключение</title>
     <style>
       * {
         margin: 0;
@@ -21,7 +21,7 @@
 
       .main-header {
         background: linear-gradient(180deg, #1a0a2e 0%, #16213e 100%);
-        padding: 15px 20px;
+        padding: 12px 20px;
         text-align: center;
         border-bottom: 2px solid #ffd70033;
         z-index: 1000;
@@ -29,28 +29,28 @@
       }
 
       .main-title {
-        font-size: 2em;
+        font-size: 1.8em;
         text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
         color: #ffd700;
         font-weight: 800;
-        letter-spacing: 3px;
+        letter-spacing: 2px;
       }
 
       .subtitle {
         color: #8b949e;
-        font-size: 0.9em;
+        font-size: 0.8em;
         font-style: italic;
       }
 
       .game-layout {
         display: flex;
-        height: calc(100vh - 100px);
+        height: calc(100vh - 90px);
       }
 
       /* Боковая панель */
       .sidebar {
-        width: 350px;
-        min-width: 350px;
+        width: 320px;
+        min-width: 320px;
         background: #161b22;
         border-right: 1px solid #30363d;
         overflow-y: auto;
@@ -69,13 +69,13 @@
 
       .panel-tab {
         flex: 1;
-        padding: 12px 8px;
+        padding: 10px 5px;
         text-align: center;
         cursor: pointer;
         background: transparent;
         border: none;
         color: #8b949e;
-        font-size: 0.8em;
+        font-size: 0.75em;
         transition: all 0.3s;
         border-bottom: 2px solid transparent;
       }
@@ -94,7 +94,7 @@
       .panel-content {
         flex: 1;
         overflow-y: auto;
-        padding: 15px;
+        padding: 12px;
       }
 
       .panel-section {
@@ -117,79 +117,112 @@
         width: 100%;
         height: 100%;
         position: relative;
-        cursor: grab;
-      }
-
-      .map-container:active {
-        cursor: grabbing;
       }
 
       .map-canvas {
         position: absolute;
         top: 0;
         left: 0;
-        transform-origin: 0 0;
+        transition: transform 0.3s ease;
       }
 
       /* Тайлы карты */
       .map-tile {
         position: absolute;
-        width: 80px;
-        height: 80px;
+        width: 70px;
+        height: 70px;
         cursor: pointer;
-        transition: all 0.2s;
         border-radius: 6px;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 2.5em;
+        font-size: 2.2em;
         user-select: none;
+        transition: all 0.2s;
+        border: 2px solid transparent;
       }
 
       .map-tile:hover {
-        transform: scale(1.05);
+        transform: scale(1.08);
         z-index: 5;
-        box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
       }
 
       .tile-forest {
         background: linear-gradient(135deg, #1a3a1a, #2d5a2d);
-        border: 2px solid #3a6b3a;
+        border-color: #3a6b3a;
       }
       .tile-mountain {
         background: linear-gradient(135deg, #3a3a3a, #5a5a5a);
-        border: 2px solid #6b6b6b;
+        border-color: #6b6b6b;
       }
       .tile-dungeon {
         background: linear-gradient(135deg, #1a1a2e, #2d2d5a);
-        border: 2px solid #4a4a8a;
+        border-color: #4a4a8a;
       }
       .tile-town {
         background: linear-gradient(135deg, #3a2a1a, #5a3a2a);
-        border: 2px solid #8a6b4a;
+        border-color: #8a6b4a;
       }
       .tile-water {
         background: linear-gradient(135deg, #1a2a3a, #2a4a6a);
-        border: 2px solid #3a6a9a;
+        border-color: #3a6a9a;
       }
       .tile-swamp {
         background: linear-gradient(135deg, #1a2a1a, #2a3a1a);
-        border: 2px solid #4a5a2a;
+        border-color: #4a5a2a;
       }
       .tile-ruins {
         background: linear-gradient(135deg, #2a2a2a, #4a4a4a);
-        border: 2px solid #6a6a6a;
+        border-color: #6a6a6a;
+      }
+
+      /* Зона перемещения (подсветка доступных клеток) */
+      .map-tile.reachable {
+        box-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+        border-color: #ffd700 !important;
+        cursor: pointer;
+        animation: reachablePulse 2s ease-in-out infinite;
+      }
+
+      @keyframes reachablePulse {
+        0%,
+        100% {
+          box-shadow: 0 0 10px rgba(255, 215, 0, 0.4);
+        }
+        50% {
+          box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+        }
+      }
+
+      /* Клетка с игроком */
+      .map-tile.current-tile {
+        border-color: #ffd700 !important;
+        box-shadow: 0 0 25px rgba(255, 215, 0, 0.9);
+        z-index: 10;
+        animation: currentPulse 1.5s ease-in-out infinite;
+      }
+
+      @keyframes currentPulse {
+        0%,
+        100% {
+          box-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
+        }
+        50% {
+          box-shadow:
+            0 0 35px rgba(255, 215, 0, 1),
+            0 0 60px rgba(255, 215, 0, 0.5);
+        }
       }
 
       /* ИГРОК НА КАРТЕ */
       .player-marker {
         position: absolute;
-        width: 70px;
-        height: 70px;
+        width: 60px;
+        height: 60px;
         pointer-events: none;
         z-index: 1000;
         transition: all 0.3s ease;
-        filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.8));
+        filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.8));
       }
 
       .player-sprite {
@@ -198,7 +231,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 3.5em;
+        font-size: 2.8em;
         animation: playerFloat 2s ease-in-out infinite;
       }
 
@@ -208,20 +241,20 @@
           transform: translateY(0);
         }
         50% {
-          transform: translateY(-8px);
+          transform: translateY(-6px);
         }
       }
 
       .player-glow {
         position: absolute;
-        bottom: -5px;
+        bottom: -2px;
         left: 50%;
         transform: translateX(-50%);
-        width: 40px;
-        height: 10px;
+        width: 35px;
+        height: 8px;
         background: radial-gradient(
           ellipse,
-          rgba(255, 215, 0, 0.6),
+          rgba(255, 215, 0, 0.7),
           transparent
         );
         border-radius: 50%;
@@ -236,17 +269,27 @@
         }
         50% {
           opacity: 1;
-          transform: translateX(-50%) scale(1.3);
+          transform: translateX(-50%) scale(1.4);
         }
+      }
+
+      /* Следы (визуализация пути) */
+      .footprint {
+        position: absolute;
+        pointer-events: none;
+        z-index: 5;
+        font-size: 1em;
+        opacity: 0.4;
+        transition: opacity 0.5s;
       }
 
       /* Мини-карта */
       .minimap {
         position: absolute;
-        bottom: 20px;
-        right: 20px;
-        width: 200px;
-        height: 150px;
+        bottom: 15px;
+        right: 15px;
+        width: 180px;
+        height: 135px;
         background: #161b22;
         border: 2px solid #30363d;
         border-radius: 10px;
@@ -268,28 +311,27 @@
       /* Информационная панель */
       .info-bar {
         position: absolute;
-        top: 20px;
-        left: 20px;
+        top: 15px;
+        left: 15px;
         background: #161b22e8;
         border: 1px solid #30363d;
         border-radius: 10px;
-        padding: 15px 20px;
+        padding: 12px 16px;
         z-index: 100;
         backdrop-filter: blur(10px);
-        max-width: 280px;
-        min-width: 250px;
+        max-width: 260px;
       }
 
       .info-bar h3 {
         color: #ffd700;
         margin-bottom: 5px;
-        font-size: 1.1em;
+        font-size: 1em;
       }
 
       .info-bar p {
-        font-size: 0.85em;
+        font-size: 0.8em;
         color: #8b949e;
-        margin: 3px 0;
+        margin: 2px 0;
       }
 
       .player-stats {
@@ -298,57 +340,45 @@
         border-top: 1px solid #30363d;
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 5px;
+        gap: 4px;
       }
 
       .stat-item {
-        font-size: 0.8em;
+        font-size: 0.75em;
       }
 
       .stat-item span {
         color: #ffd700;
       }
 
-      /* Кнопки управления */
-      .map-controls {
+      /* Легенда перемещения */
+      .move-legend {
         position: absolute;
-        bottom: 20px;
-        left: 20px;
-        display: flex;
-        gap: 10px;
-        z-index: 100;
-      }
-
-      .map-btn {
-        background: #161b22;
+        bottom: 15px;
+        left: 15px;
+        background: #161b22e8;
         border: 1px solid #30363d;
-        color: #c9d1d9;
-        width: 40px;
-        height: 40px;
         border-radius: 8px;
-        cursor: pointer;
-        font-size: 1.2em;
-        transition: all 0.3s;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        padding: 8px 12px;
+        z-index: 100;
+        font-size: 0.7em;
+        color: #8b949e;
       }
 
-      .map-btn:hover {
-        background: #1c2128;
-        border-color: #ffd700;
+      .move-legend span {
+        color: #ffd700;
       }
 
       /* Стили панелей */
       .dice-grid {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
-        gap: 8px;
-        margin-bottom: 15px;
+        gap: 6px;
+        margin-bottom: 12px;
       }
 
       .dice-btn {
-        padding: 12px 8px;
+        padding: 10px 6px;
         border-radius: 8px;
         border: 1px solid #30363d;
         background: #21262d;
@@ -356,7 +386,7 @@
         cursor: pointer;
         transition: all 0.3s;
         font-weight: 600;
-        font-size: 1em;
+        font-size: 0.9em;
       }
 
       .dice-btn:hover {
@@ -368,7 +398,7 @@
 
       .gen-btn {
         width: 100%;
-        padding: 10px;
+        padding: 8px;
         border-radius: 8px;
         border: none;
         background: linear-gradient(135deg, #8b6914, #ffd700);
@@ -376,8 +406,8 @@
         cursor: pointer;
         font-weight: 700;
         transition: all 0.3s;
-        margin: 5px 0;
-        font-size: 0.95em;
+        margin: 4px 0;
+        font-size: 0.9em;
       }
 
       .gen-btn:hover {
@@ -394,26 +424,26 @@
       .result-box {
         background: #21262d;
         border-radius: 10px;
-        padding: 15px;
-        margin: 10px 0;
+        padding: 12px;
+        margin: 8px 0;
         text-align: center;
         border: 1px solid #30363d;
       }
 
       .result-number {
-        font-size: 2.5em;
+        font-size: 2.2em;
         color: #ffd700;
         font-weight: 700;
       }
 
       .history-log {
-        max-height: 120px;
+        max-height: 100px;
         overflow-y: auto;
-        font-size: 0.75em;
+        font-size: 0.7em;
         background: #0d1117;
         border-radius: 8px;
-        padding: 8px;
-        margin-top: 10px;
+        padding: 6px;
+        margin-top: 8px;
       }
 
       .history-log div {
@@ -423,14 +453,14 @@
       }
 
       input[type="number"] {
-        width: 50px;
+        width: 45px;
         background: #21262d;
         border: 1px solid #30363d;
         color: #c9d1d9;
-        padding: 6px;
+        padding: 5px;
         border-radius: 5px;
         text-align: center;
-        font-size: 0.9em;
+        font-size: 0.85em;
       }
 
       @media (max-width: 768px) {
@@ -440,24 +470,40 @@
         .sidebar {
           width: 100%;
           min-width: 100%;
-          height: 40vh;
+          height: 35vh;
         }
         .map-wrapper {
-          height: 60vh;
+          height: 65vh;
         }
         .info-bar {
           top: 5px;
           left: 5px;
-          max-width: 180px;
-          padding: 10px;
-          font-size: 0.7em;
+          max-width: 160px;
+          padding: 8px;
+          font-size: 0.65em;
+        }
+        .move-legend {
+          bottom: 5px;
+          left: 5px;
+          font-size: 0.6em;
+        }
+        .minimap {
+          width: 120px;
+          height: 90px;
+          bottom: 5px;
+          right: 5px;
+        }
+        .map-tile {
+          width: 55px;
+          height: 55px;
+          font-size: 1.6em;
         }
         .player-marker {
-          width: 50px;
-          height: 50px;
+          width: 45px;
+          height: 45px;
         }
         .player-sprite {
-          font-size: 2.5em;
+          font-size: 2em;
         }
       }
     </style>
@@ -484,14 +530,14 @@
             💎 Лут
           </button>
           <button class="panel-tab" onclick="switchPanel('encounter')">
-            ⚔️ Встречи
+            ⚔️ Бой
           </button>
         </div>
 
         <div class="panel-content">
           <!-- Панель костей -->
           <div id="panel-dice" class="panel-section active">
-            <h3 style="color: #ffd700; margin-bottom: 10px">Бросок костей</h3>
+            <h3 style="color: #ffd700; margin-bottom: 8px">Бросок костей</h3>
             <div class="dice-grid">
               <button class="dice-btn" onclick="quickRoll(4)">d4</button>
               <button class="dice-btn" onclick="quickRoll(6)">d6</button>
@@ -504,8 +550,8 @@
             <div
               style="
                 display: flex;
-                gap: 8px;
-                margin: 10px 0;
+                gap: 6px;
+                margin: 8px 0;
                 align-items: center;
               "
             >
@@ -523,7 +569,7 @@
 
             <div class="result-box">
               <div class="result-number" id="quickResult">🎯</div>
-              <div id="quickDetail" style="font-size: 0.85em; color: #8b949e">
+              <div id="quickDetail" style="font-size: 0.8em; color: #8b949e">
                 Нажмите на кость
               </div>
             </div>
@@ -533,31 +579,31 @@
 
           <!-- Панель персонажа -->
           <div id="panel-character" class="panel-section">
-            <h3 style="color: #ffd700; margin-bottom: 10px">Ваш герой</h3>
+            <h3 style="color: #ffd700; margin-bottom: 8px">Ваш герой</h3>
             <button class="gen-btn" onclick="generateCharacter()">
               🎭 Создать героя
             </button>
-            <div id="characterInfo" style="margin-top: 10px"></div>
+            <div id="characterInfo" style="margin-top: 8px"></div>
           </div>
 
           <!-- Панель лута -->
           <div id="panel-loot" class="panel-section">
-            <h3 style="color: #ffd700; margin-bottom: 10px">Сокровища</h3>
+            <h3 style="color: #ffd700; margin-bottom: 8px">Сокровища</h3>
             <button class="gen-btn" onclick="generateLoot()">
               💎 Найти лут
             </button>
-            <div id="lootInfo" style="margin-top: 10px"></div>
+            <div id="lootInfo" style="margin-top: 8px"></div>
           </div>
 
           <!-- Панель встреч -->
           <div id="panel-encounter" class="panel-section">
-            <h3 style="color: #ffd700; margin-bottom: 10px">
+            <h3 style="color: #ffd700; margin-bottom: 8px">
               Случайная встреча
             </h3>
             <button class="gen-btn" onclick="generateEncounter()">
               ⚔️ Встретить врага
             </button>
-            <div id="encounterInfo" style="margin-top: 10px"></div>
+            <div id="encounterInfo" style="margin-top: 8px"></div>
           </div>
         </div>
       </div>
@@ -592,21 +638,10 @@
           </div>
         </div>
 
-        <!-- Кнопки управления -->
-        <div class="map-controls">
-          <button class="map-btn" onclick="zoomMap(0.2)" title="Приблизить">
-            ➕
-          </button>
-          <button class="map-btn" onclick="zoomMap(-0.2)" title="Отдалить">
-            ➖
-          </button>
-          <button
-            class="map-btn"
-            onclick="resetMap()"
-            title="Центрировать на игроке"
-          >
-            🎯
-          </button>
+        <!-- Легенда -->
+        <div class="move-legend">
+          <span>WASD</span> / <span>🖱️ клик</span> — перемещение<br />
+          <span style="color: #ffd700">✨</span> — доступные клетки
         </div>
       </div>
     </div>
@@ -615,7 +650,8 @@
       // ==================== ДАННЫЕ ИГРЫ ====================
       const MAP_WIDTH = 25;
       const MAP_HEIGHT = 18;
-      const TILE_SIZE = 80;
+      const TILE_SIZE = 70;
+      const MOVE_RADIUS = 2; // Радиус видимости для перемещения
 
       const TILE_TYPES = {
         forest: {
@@ -674,10 +710,6 @@
         race: "Человек",
         class: "Воин",
       };
-      let currentZoom = 1;
-      let mapOffset = { x: 0, y: 0 };
-      let isDragging = false;
-      let dragStart = { x: 0, y: 0 };
 
       // ==================== ГЕНЕРАЦИЯ КАРТЫ ====================
       function generateMap() {
@@ -725,32 +757,30 @@
         gameMap[6][22] = "ruins";
       }
 
+      // ==================== ПРОВЕРКА ДОСТУПНОСТИ КЛЕТКИ ====================
+      function isReachable(x, y) {
+        const dx = Math.abs(x - playerPosition.x);
+        const dy = Math.abs(y - playerPosition.y);
+        // В радиусе 2 клеток, включая диагонали
+        return (
+          dx <= MOVE_RADIUS && dy <= MOVE_RADIUS && !(dx === 0 && dy === 0)
+        );
+      }
+
       // ==================== ОТРИСОВКА КАРТЫ ====================
       function renderMap() {
         const canvas = document.getElementById("mapCanvas");
-        canvas.style.width = `${MAP_WIDTH * TILE_SIZE}px`;
-        canvas.style.height = `${MAP_HEIGHT * TILE_SIZE}px`;
         canvas.innerHTML = "";
 
-        const startX = Math.max(
-          0,
-          Math.floor(-mapOffset.x / TILE_SIZE / currentZoom),
-        );
-        const startY = Math.max(
-          0,
-          Math.floor(-mapOffset.y / TILE_SIZE / currentZoom),
-        );
-        const endX = Math.min(
-          MAP_WIDTH,
-          startX + Math.ceil(window.innerWidth / TILE_SIZE / currentZoom) + 2,
-        );
-        const endY = Math.min(
-          MAP_HEIGHT,
-          startY + Math.ceil(window.innerHeight / TILE_SIZE / currentZoom) + 2,
-        );
+        // Показываем тайлы в радиусе видимости + 3 для контекста
+        const viewRadius = MOVE_RADIUS + 3;
+        const startX = Math.max(0, playerPosition.x - viewRadius);
+        const startY = Math.max(0, playerPosition.y - viewRadius);
+        const endX = Math.min(MAP_WIDTH - 1, playerPosition.x + viewRadius);
+        const endY = Math.min(MAP_HEIGHT - 1, playerPosition.y + viewRadius);
 
-        for (let y = startY; y < endY; y++) {
-          for (let x = startX; x < endX; x++) {
+        for (let y = startY; y <= endY; y++) {
+          for (let x = startX; x <= endX; x++) {
             const tileType = TILE_TYPES[gameMap[y][x]];
             const tile = document.createElement("div");
             tile.className = `map-tile ${tileType.class}`;
@@ -759,16 +789,27 @@
             tile.style.width = `${TILE_SIZE}px`;
             tile.style.height = `${TILE_SIZE}px`;
             tile.textContent = tileType.icon;
-            tile.addEventListener("click", (e) => {
-              e.stopPropagation();
-              movePlayer(x, y);
-            });
+
+            // Подсветка доступных клеток
+            if (isReachable(x, y)) {
+              tile.classList.add("reachable");
+              tile.addEventListener("click", (e) => {
+                e.stopPropagation();
+                movePlayer(x, y);
+              });
+            }
+
+            // Подсветка текущей клетки
+            if (x === playerPosition.x && y === playerPosition.y) {
+              tile.classList.add("current-tile");
+            }
+
             canvas.appendChild(tile);
           }
         }
 
-        // Применяем трансформацию к canvas
-        canvas.style.transform = `translate(${mapOffset.x}px, ${mapOffset.y}px) scale(${currentZoom})`;
+        // Центрируем карту на игроке
+        centerOnPlayer();
 
         // Обновляем позицию игрока
         updatePlayerMarker();
@@ -776,33 +817,56 @@
         updateInfoBar();
       }
 
+      // ==================== ЦЕНТРИРОВАНИЕ НА ИГРОКЕ ====================
+      function centerOnPlayer() {
+        const canvas = document.getElementById("mapCanvas");
+        const wrapper = document.getElementById("mapWrapper");
+
+        const playerPixelX = playerPosition.x * TILE_SIZE + TILE_SIZE / 2;
+        const playerPixelY = playerPosition.y * TILE_SIZE + TILE_SIZE / 2;
+
+        const offsetX = wrapper.offsetWidth / 2 - playerPixelX;
+        const offsetY = wrapper.offsetHeight / 2 - playerPixelY;
+
+        canvas.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
+      }
+
       // ==================== ОТОБРАЖЕНИЕ ИГРОКА ====================
       function updatePlayerMarker() {
         const marker = document.getElementById("playerMarker");
-        const tileCenterX = playerPosition.x * TILE_SIZE + TILE_SIZE / 2;
-        const tileCenterY = playerPosition.y * TILE_SIZE + TILE_SIZE / 2;
+        const canvas = document.getElementById("mapCanvas");
 
-        // Позиция с учётом зума и смещения
-        const screenX =
-          tileCenterX * currentZoom + mapOffset.x - 35 * currentZoom;
-        const screenY =
-          tileCenterY * currentZoom + mapOffset.y - 60 * currentZoom;
+        // Получаем текущую трансформацию canvas
+        const transform = canvas.style.transform;
+        const translateMatch = transform.match(
+          /translate\(([-\d.]+)px,\s*([-\d.]+)px\)/,
+        );
 
-        marker.style.left = `${screenX}px`;
-        marker.style.top = `${screenY}px`;
-        marker.style.transform = `scale(${currentZoom})`;
+        let offsetX = 0,
+          offsetY = 0;
+        if (translateMatch) {
+          offsetX = parseFloat(translateMatch[1]);
+          offsetY = parseFloat(translateMatch[2]);
+        }
+
+        const playerPixelX = playerPosition.x * TILE_SIZE + TILE_SIZE / 2;
+        const playerPixelY = playerPosition.y * TILE_SIZE + TILE_SIZE / 2;
+
+        marker.style.left = `${playerPixelX + offsetX - 30}px`;
+        marker.style.top = `${playerPixelY + offsetY - 50}px`;
       }
 
       // ==================== МИНИ-КАРТА ====================
       function updateMinimap() {
         const canvas = document.getElementById("minimapCanvas");
         const ctx = canvas.getContext("2d");
-        canvas.width = 200;
-        canvas.height = 150;
+        canvas.width = 180;
+        canvas.height = 135;
 
-        const scaleX = canvas.width / (MAP_WIDTH * TILE_SIZE);
-        const scaleY = canvas.height / (MAP_HEIGHT * TILE_SIZE);
-        const scale = Math.min(scaleX, scaleY);
+        const scale = Math.min(
+          canvas.width / (MAP_WIDTH * TILE_SIZE),
+          canvas.height / (MAP_HEIGHT * TILE_SIZE),
+        );
 
         ctx.fillStyle = "#0d1117";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -820,6 +884,32 @@
           }
         }
 
+        // Зона видимости
+        const viewRadius = MOVE_RADIUS + 3;
+        const viewStartX =
+          Math.max(0, playerPosition.x - viewRadius) * TILE_SIZE * scale;
+        const viewStartY =
+          Math.max(0, playerPosition.y - viewRadius) * TILE_SIZE * scale;
+        const viewEndX =
+          Math.min(MAP_WIDTH - 1, playerPosition.x + viewRadius) *
+            TILE_SIZE *
+            scale +
+          TILE_SIZE * scale;
+        const viewEndY =
+          Math.min(MAP_HEIGHT - 1, playerPosition.y + viewRadius) *
+            TILE_SIZE *
+            scale +
+          TILE_SIZE * scale;
+
+        ctx.strokeStyle = "#ffffff44";
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(
+          viewStartX,
+          viewStartY,
+          viewEndX - viewStartX,
+          viewEndY - viewStartY,
+        );
+
         // Игрок на мини-карте
         const playerMiniX =
           playerPosition.x * TILE_SIZE * scale + (TILE_SIZE * scale) / 2;
@@ -827,25 +917,19 @@
           playerPosition.y * TILE_SIZE * scale + (TILE_SIZE * scale) / 2;
 
         // Свечение
-        ctx.fillStyle = "rgba(255, 215, 0, 0.3)";
+        ctx.fillStyle = "rgba(255, 215, 0, 0.4)";
         ctx.beginPath();
-        ctx.arc(playerMiniX, playerMiniY, 8, 0, Math.PI * 2);
+        ctx.arc(playerMiniX, playerMiniY, 7, 0, Math.PI * 2);
         ctx.fill();
 
         // Точка игрока
         ctx.fillStyle = "#ffd700";
+        ctx.shadowBlur = 8;
+        ctx.shadowColor = "#ffd700";
         ctx.beginPath();
-        ctx.arc(playerMiniX, playerMiniY, 4, 0, Math.PI * 2);
+        ctx.arc(playerMiniX, playerMiniY, 3.5, 0, Math.PI * 2);
         ctx.fill();
-
-        // Область просмотра
-        ctx.strokeStyle = "#ffffff66";
-        ctx.lineWidth = 2;
-        const viewX = (-mapOffset.x * scale) / currentZoom;
-        const viewY = (-mapOffset.y * scale) / currentZoom;
-        const viewW = (window.innerWidth * scale) / currentZoom;
-        const viewH = (window.innerHeight * scale) / currentZoom;
-        ctx.strokeRect(viewX, viewY, viewW, viewH);
+        ctx.shadowBlur = 0;
       }
 
       // ==================== ИНФО-ПАНЕЛЬ ====================
@@ -878,64 +962,40 @@
 
       // ==================== ПЕРЕМЕЩЕНИЕ ИГРОКА ====================
       function movePlayer(x, y) {
-        const distance =
-          Math.abs(x - playerPosition.x) + Math.abs(y - playerPosition.y);
-
-        if (distance === 0) return;
-
-        // Можно ходить только на соседние клетки (включая диагонали)
-        const dx = Math.abs(x - playerPosition.x);
-        const dy = Math.abs(y - playerPosition.y);
-
-        if (dx <= 1 && dy <= 1 && !(dx === 0 && dy === 0)) {
-          playerPosition.x = x;
-          playerPosition.y = y;
-          moveCounter++;
-
-          // Восстановление HP при движении
-          if (moveCounter % 5 === 0 && playerStats.hp < playerStats.maxHp) {
-            playerStats.hp = Math.min(playerStats.maxHp, playerStats.hp + 1);
-          }
-
-          centerOnPlayer();
-
-          // Случайное событие
-          if (Math.random() < 0.3) {
-            triggerRandomEvent();
-          }
-
-          renderMap();
-        } else if (distance > 1) {
-          showToast("🗺️ Используйте WASD или кликайте на соседние клетки");
+        if (!isReachable(x, y)) {
+          showToast(
+            "🗺️ Эта клетка слишком далеко! Радиус перемещения: 2 клетки",
+          );
+          return;
         }
-      }
 
-      function centerOnPlayer() {
-        const wrapper = document.getElementById("mapWrapper");
-        const centerX = playerPosition.x * TILE_SIZE * currentZoom;
-        const centerY = playerPosition.y * TILE_SIZE * currentZoom;
+        playerPosition.x = x;
+        playerPosition.y = y;
+        moveCounter++;
 
-        mapOffset.x = wrapper.offsetWidth / 2 - centerX;
-        mapOffset.y = wrapper.offsetHeight / 2 - centerY;
-      }
+        // Восстановление HP при движении
+        if (moveCounter % 5 === 0 && playerStats.hp < playerStats.maxHp) {
+          playerStats.hp = Math.min(playerStats.maxHp, playerStats.hp + 1);
+          showToast("❤️ +1 HP (восстановление в пути)");
+        }
 
-      function zoomMap(delta) {
-        currentZoom = Math.max(0.5, Math.min(2, currentZoom + delta));
+        // Случайное событие
+        if (Math.random() < 0.3) {
+          triggerRandomEvent();
+        }
+
         renderMap();
-      }
-
-      function resetMap() {
-        currentZoom = 1;
-        centerOnPlayer();
-        renderMap();
-        showToast("🎯 Карта центрирована на игроке");
       }
 
       function showToast(message) {
+        // Удаляем старые тосты
+        document.querySelectorAll(".toast-message").forEach((t) => t.remove());
+
         const toast = document.createElement("div");
+        toast.className = "toast-message";
         toast.style.cssText = `
                 position: fixed;
-                bottom: 30px;
+                bottom: 25px;
                 left: 50%;
                 transform: translateX(-50%);
                 background: #161b22;
@@ -944,58 +1004,51 @@
                 border-radius: 20px;
                 border: 1px solid #30363d;
                 z-index: 9999;
-                animation: fadeInOut 2s ease;
+                font-size: 0.9em;
+                animation: fadeInOut 2.5s ease;
+                pointer-events: none;
             `;
         toast.textContent = message;
         document.body.appendChild(toast);
-        setTimeout(() => toast.remove(), 2000);
+
+        setTimeout(() => {
+          if (toast.parentNode) toast.remove();
+        }, 2500);
       }
+
+      // Добавляем стиль для анимации тостов
+      const toastStyle = document.createElement("style");
+      toastStyle.textContent = `
+            @keyframes fadeInOut {
+                0% { opacity: 0; transform: translateX(-50%) translateY(10px); }
+                15% { opacity: 1; transform: translateX(-50%) translateY(0); }
+                85% { opacity: 1; transform: translateX(-50%) translateY(0); }
+                100% { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+            }
+        `;
+      document.head.appendChild(toastStyle);
 
       function triggerRandomEvent() {
         const events = [
-          "✨ Вы нашли несколько золотых монет! (+10 Au)",
-          "👂 Странный шум раздаётся неподалёку...",
-          "🐾 Вы заметили следы крупного зверя.",
-          "📜 Старый свиток валяется на земле.",
-          "🐇 Мимо пробежал испуганный заяц.",
-          "💨 Ветер доносит запах дыма.",
-          "⚔️ Вы слышите далёкий звон мечей.",
-          "💎 Что-то блестит под кустом! (+5 Au)",
+          { text: "✨ Вы нашли несколько золотых монет! (+10 Au)", gold: 10 },
+          { text: "👂 Странный шум раздаётся неподалёку...", gold: 0 },
+          { text: "🐾 Вы заметили следы крупного зверя.", gold: 0 },
+          { text: "📜 Старый свиток валяется на земле.", gold: 0 },
+          { text: "🐇 Мимо пробежал испуганный заяц.", gold: 0 },
+          { text: "💨 Ветер доносит запах дыма.", gold: 0 },
+          { text: "⚔️ Вы слышите далёкий звон мечей.", gold: 0 },
+          { text: "💎 Что-то блестит под кустом! (+5 Au)", gold: 5 },
         ];
 
         const event = events[Math.floor(Math.random() * events.length)];
+        playerStats.gold += event.gold;
 
-        if (event.includes("+10 Au")) playerStats.gold += 10;
-        if (event.includes("+5 Au")) playerStats.gold += 5;
-
-        showToast(event);
+        updateInfoBar();
+        showToast(event.text);
       }
-
-      // ==================== ПЕРЕТАСКИВАНИЕ КАРТЫ ====================
-      const mapContainer = document.getElementById("mapContainer");
-
-      mapContainer.addEventListener("mousedown", (e) => {
-        if (e.target.closest(".map-tile")) return;
-        isDragging = true;
-        dragStart = { x: e.clientX - mapOffset.x, y: e.clientY - mapOffset.y };
-        mapContainer.style.cursor = "grabbing";
-      });
-
-      window.addEventListener("mousemove", (e) => {
-        if (!isDragging) return;
-        mapOffset.x = e.clientX - dragStart.x;
-        mapOffset.y = e.clientY - dragStart.y;
-        renderMap();
-      });
-
-      window.addEventListener("mouseup", () => {
-        isDragging = false;
-        mapContainer.style.cursor = "grab";
-      });
 
       // ==================== УПРАВЛЕНИЕ КЛАВИШАМИ ====================
       window.addEventListener("keydown", (e) => {
-        // Не двигаемся, если фокус в поле ввода
         if (e.target.tagName === "INPUT") return;
 
         let newX = playerPosition.x;
@@ -1027,14 +1080,10 @@
         }
 
         if (newX >= 0 && newX < MAP_WIDTH && newY >= 0 && newY < MAP_HEIGHT) {
-          movePlayer(newX, newY);
+          if (isReachable(newX, newY)) {
+            movePlayer(newX, newY);
+          }
         }
-      });
-
-      // Масштабирование колёсиком
-      document.getElementById("mapWrapper").addEventListener("wheel", (e) => {
-        e.preventDefault();
-        zoomMap(e.deltaY > 0 ? -0.1 : 0.1);
       });
 
       // ==================== ФУНКЦИИ ПАНЕЛЕЙ ====================
@@ -1150,7 +1199,7 @@
                     <p>Уровень: ${playerStats.level}</p>
                     <p>❤️ HP: ${playerStats.hp}/${playerStats.maxHp}</p>
                     <p>💰 Золото: ${playerStats.gold}</p>
-                    <p style="font-size: 0.8em; margin-top: 5px;">
+                    <p style="font-size: 0.75em; margin-top: 5px;">
                         Сила: ${Math.floor(Math.random() * 8 + 10)} | 
                         Ловк: ${Math.floor(Math.random() * 8 + 10)} | 
                         Инт: ${Math.floor(Math.random() * 8 + 10)}
@@ -1206,7 +1255,7 @@
                     <h4 style="color: #ffd700;">✨ ${item.name}</h4>
                     <p>${item.desc}</p>
                     <p style="color: #ffd700;">+${item.gold} золотых</p>
-                    <p style="font-size: 0.8em; color: #8b949e;">
+                    <p style="font-size: 0.75em; color: #8b949e;">
                         Найдено в: ${TILE_TYPES[gameMap[playerPosition.y][playerPosition.x]].name}
                     </p>
                 </div>
@@ -1238,8 +1287,8 @@
                 <div class="result-box" style="border-color: #ff444466;">
                     <h4 style="color: #ff4444;">⚔️ ${monster}</h4>
                     <p>Уровень опасности: ${cr}</p>
-                    <p style="font-size: 0.85em;">Бросьте d20 для атаки!</p>
-                    <button class="gen-btn" onclick="quickRoll(20)" style="margin-top: 10px;">
+                    <p style="font-size: 0.8em;">Бросьте d20 для атаки!</p>
+                    <button class="gen-btn" onclick="quickRoll(20)" style="margin-top: 8px;">
                         🎲 Атаковать (d20)
                     </button>
                 </div>
@@ -1251,18 +1300,20 @@
       // ==================== ИНИЦИАЛИЗАЦИЯ ====================
       function initGame() {
         generateMap();
-        centerOnPlayer();
         renderMap();
         generateCharacter();
 
         document.getElementById("quickResult").textContent = "🎯";
         document.getElementById("quickDetail").textContent = "Бросьте кость!";
 
-        showToast("🗺️ Используйте WASD или клик для перемещения");
+        showToast("🗺️ Используйте WASD или клик — радиус 2 клетки");
       }
 
       window.addEventListener("load", initGame);
-      window.addEventListener("resize", renderMap);
+      window.addEventListener("resize", () => {
+        centerOnPlayer();
+        updatePlayerMarker();
+      });
     </script>
   </body>
 </html>
